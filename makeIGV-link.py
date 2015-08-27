@@ -8,12 +8,20 @@ parser = argparse.ArgumentParser(usage='%(prog)s --dataDirectory <path/to/yourDa
                                               including VCF and BAM",
                                 add_help=True
                                 )
-parser.add_argument('--dataDirectory', required=True,
-                                        help="specify directory with bam files to be made into IGV links")
-parser.add_argument('--defaultCoordinates', nargs=3, default=map(str, [1, 2, 3]),
-                                        help="This will be your default coordinates when IGV loads for the first\
-                                              time when IGV loads. Pass coordinates as follows <Chromosome Start End>")
-parser.add_argument('--serverName', default='bioinformatics.erc.monash.edu')
+parser.add_argument('--dataDirectory',
+                     required=True,
+                    help="specify directory with your data files to be made into IGV links"
+                    )
+parser.add_argument('--defaultCoordinates',
+                    nargs=3,
+                    default=map(str, [12, 24565477, 24624103]),
+                    help="This will be your default coordinates when IGV loads for the first time when IGV loads.\
+                          Pass coordinates as follows <Chromosome Start End>"
+                    )
+parser.add_argument('--serverName',
+                    default='bioinformatics.erc.monash.edu',
+                    help='Provide your hosting server name'
+                    )
 
 args = parser.parse_args()
 dataDirectory = args.dataDirectory
