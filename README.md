@@ -2,8 +2,8 @@
 
 ## Content
 
-- [makeIGV-link.py](#makeigv-link.py)
-- [makeBioDalliance.py](#makebiodalliance.py)
+- [makeIGV-link.py](###makeigv-link.py)
+- [makeBioDalliance.py](###makebiodalliance.py)
 
 > This is communal repository to which anyone is welcome to contribute they own python scripts. 
 
