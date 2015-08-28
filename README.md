@@ -30,7 +30,7 @@ OR
 - Clone the whole repository
 `git clone https://github.com/MonashBioinformaticsPlatform/PieScripts.git`
 
-### makeDallaince 
+### makeBioDallaince 
 
 [BioDalliance](http://www.biodalliance.org/) is this awesome _browser_ to view genomic data. It is a self
 contained JavaScript object that you can embed into web page. Major advantage of BioDalliance is it's truly
