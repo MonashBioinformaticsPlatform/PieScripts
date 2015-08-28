@@ -30,7 +30,7 @@ htmlTemplate = '''
                        desc:        'There will be longer desctiption placed here',
                        twoBitURI:   '%s'
                       },
-                      {name:        'Annoatation',
+                      {name:        'Annotation',
                        desc:        'Genes annotation, showing Exons and Introns boundaries',
                        bwgURI:      '%s',
                        collapseSuperGroups: true,
