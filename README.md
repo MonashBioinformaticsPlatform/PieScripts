@@ -2,7 +2,7 @@
 
 > This is communal repository to which anyone is welcome to contribute they own python scripts. 
 > Please follow the convention and do append quick summary about your script into `README.md` file.
-> Use \#\#\# for the heading following your python script name without `.py` suffix 
+> Use \#\#\# to mark your heading following your python script name without `.py` suffix 
 
 ## Content
 
