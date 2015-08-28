@@ -1,13 +1,11 @@
 # This is tasty as repo, yam ! 
 
+> This is communal repository to which anyone is welcome to contribute they own python scripts. 
+
 ## Content
 
 - [makeIGV-link](#makeigv-link)
 - [makeBioDalliance](#makebiodalliance)
-
-> This is communal repository to which anyone is welcome to contribute they own python scripts. 
-
-----------------------------------------------------------------------------------------------------
 
 ### makeIGV-link
 
@@ -30,7 +28,7 @@ OR
 - Clone the whole repository
 `git clone https://github.com/MonashBioinformaticsPlatform/PieScripts.git`
 
-### makeBioDallaince 
+### makeBioDalliance 
 
 [BioDalliance](http://www.biodalliance.org/) is this awesome _browser_ to view genomic data. It is a self
 contained JavaScript object that you can embed into web page. Major advantage of BioDalliance is it's truly
