@@ -1,7 +1,6 @@
 # This is tasty as repo, yam ! 
 
-> I'm plaining to have this communal repository where I or any one else can deposit 
-> python scripts that make my life easier and other might find them useful.
+> This is communal repository to which anyone is welcome to contribute they own python scripts. 
 
 ----------------------------------------------------------------------------------------------------
 
@@ -18,11 +17,13 @@ To start with `makeIGV-link.py` simply downloaded the file and run it in command
 
 Option to download the file:
 
-- Just the file `wget https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PieScripts/master/makeIGV-link.py`
+- Just the file
+`wget https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PieScripts/master/makeIGV-link.py`
 
 OR 
 
-- Clone the whole repository `git clone https://github.com/MonashBioinformaticsPlatform/PieScripts.git`
+- Clone the whole repository
+`git clone https://github.com/MonashBioinformaticsPlatform/PieScripts.git`
 
 ### `makeDallaince.py` 
 
