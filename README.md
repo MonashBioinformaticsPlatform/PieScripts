@@ -9,6 +9,7 @@
 - [makeIGV-link](#makeigv-link)
 - [makeBioDalliance](#makebiodalliance)
 - [mergeCounts](#mergecounts)
+- [getChromSizes](#getchromsizes)
 
 ### makeIGV-link
 
@@ -70,6 +71,22 @@ To start with `mergeCounts.py` simply download the file and run it in command li
 Option to download the file:
 
 - Just the file `wget https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PieScripts/master/mergeCounts.py`
+
+OR 
+
+- Clone the whole repository `git clone https://github.com/MonashBioinformaticsPlatform/PieScripts.git`
+
+### getChromSizes
+
+This is almost two lines of code using biopython to get chromosome (or other sequence identifier) and its 
+length. Some tools may require that you give a file with chromosome sizes usually with `.chrom.sizes`
+extension. Here is a reference to [IGV](http://www.broadinstitute.org/igv/chromSizes) needing such file.
+
+To start with `getChromSizes.py` simply download the file and run it in command line with `--help` option.
+
+Option to download the file:
+
+- Just the file `wget https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PieScripts/master/getChromSizes.py`
 
 OR 
 
