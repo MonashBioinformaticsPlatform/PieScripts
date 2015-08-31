@@ -51,4 +51,8 @@ OR
 
 ### mergeCounts
 
-Quick script that you can use to merge read counts files that you would typically get from htseq-count or featureCounts
+Quick script that you can use to merge read counts files that you would typically get from htseq-count or
+featureCounts. Usually for each BAM file you will get a single text `.txt` file with gene names in first
+column and actual counts in the second column, some tools can output more information than that into `.txt`.
+e.g featureCounts output 7 different columns
+
