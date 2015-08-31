@@ -19,7 +19,7 @@ IGV is pretty cool in that it's enable your to launch and use it without needing
 machine. Sometimes you do need to install some JAVA dependencies on your local machine to be able to run IGV
 over internet. Here is a link on how to start [IGV with web start](http://www.broadinstitute.org/igv/startingIGV).
 
-To start with `makeIGV-link.py` simply downloaded the file and run it in command line with `--help` option.
+To start with `makeIGV-link.py` simply download the file and run it in command line with `--help` option.
 
 Option to download the file:
 
@@ -39,7 +39,7 @@ platform independed and you can run it from any device that supports web browser
 different way to interact with your data. You can view your data on the smart phone or a table or desktop. With
 everything being in the _cloud_ these days you don't want to limit yourself to desktop only applications. 
 
-To start with `makeDalliance.py` simply downloaded the file and run it in command line with `--help` option.
+To start with `makeDalliance.py` simply download the file and run it in command line with `--help` option.
 
 Option to download the file:
 
@@ -54,5 +54,23 @@ OR
 Quick script that you can use to merge read counts files that you would typically get from htseq-count or
 featureCounts. Usually for each BAM file you will get a single text `.txt` file with gene names in first
 column and actual counts in the second column, some tools can output more information than that into `.txt`.
-e.g featureCounts output 7 different columns
+e.g featureCounts output 7 different columns. Some downstream applications accept single file only for 
+further differential gene expression analysis e.g [Degut](http://www.vicbioinformatics.com/degust/) requires
+single TSV or CSV file for its upload. 
 
+Default settings thus far optimased for `featureCounts`:
+
+- `readsColumn` set to 7 
+- `usersBiotype` is turned off, i.e it will print everything coding and non coding types
+- `nameDelimiter` is set to underscore character - `_`
+- `headerLines` is set to 2
+
+To start with `mergeCounts.py` simply download the file and run it in command line with `--help` option.
+
+Option to download the file:
+
+- Just the file `wget https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PieScripts/master/mergeCounts.py`
+
+OR 
+
+- Clone the whole repository `git clone https://github.com/MonashBioinformaticsPlatform/PieScripts.git`
