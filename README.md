@@ -8,6 +8,7 @@
 
 - [makeIGV-link](#makeigv-link)
 - [makeBioDalliance](#makebiodalliance)
+- [mergeCounts](#mergecounts)
 
 ### makeIGV-link
 
@@ -47,3 +48,7 @@ Option to download the file:
 OR 
 
 - Clone the whole repository `git clone https://github.com/MonashBioinformaticsPlatform/PieScripts.git`
+
+### mergeCounts
+
+Quick script that you can use to merge read counts files that you would typically get from htseq-count or featureCounts
