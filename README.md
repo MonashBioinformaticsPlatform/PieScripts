@@ -7,9 +7,16 @@
 ## Content
 
 - [makeIGV-link](#makeigv-link)
+- [alignmentStats](#alignmentStats)
 - [makeBioDalliance](#makebiodalliance)
 - [mergeCounts](#mergecounts)
 - [getChromSizes](#getchromsizes)
+
+#### alignmentStats
+
+Easy to use python script to get summary report on your alignment run. This script only works with STAR alignment, because this script parsers `*Log.final.out` files that STAR produces by default.
+
+Usage: `./alignmentStats.py --bamsDirectory <BAM files directory> >> index.html`
 
 ### makeIGV-link
 
