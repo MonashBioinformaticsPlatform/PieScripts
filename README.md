@@ -7,7 +7,7 @@
 ## Content
 
 - [makeIGV-link](#makeigv-link)
-- [alignmentStats](#alignmentStats)
+- [alignmentStats](#alignmentstats)
 - [makeBioDalliance](#makebiodalliance)
 - [mergeCounts](#mergecounts)
 - [getChromSizes](#getchromsizes)
