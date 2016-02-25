@@ -16,9 +16,9 @@ parser.add_argument('--defaultCoordinates',
                     help="This will be your default coordinates when IGV loads for the first time when IGV loads.\
                           Pass coordinates as a string e.g follows chr12:24565477-24624103"
                     )
-parser.add_argument('--serverName',
-                    default='bioinformatics.erc.monash.edu',
-                    help='Provide your hosting server name'
+parser.add_argument('--host_name',
+		            default='http://bioinformatics.erc.monash.edu',
+                    help='Provide your hosting server name [bioinformatics.erc.monash.edu]'
                     )
 parser.add_argument('--launchIGVfile',
 					help="Specify path to your igv.jnlp - java web start file, to launch IGV"
@@ -30,7 +30,7 @@ parser.add_argument('--genome',
 args = parser.parse_args()
 dataDirectory = args.dataDirectory
 defaultCoordinates = args.defaultCoordinates
-serverName = args.serverName
+host_name = args.host_name
 launchIGVfile = args.launchIGVfile
 genome = args.genome
 
@@ -40,10 +40,10 @@ listOfFiles = os.listdir(dataDirectory)
 header = True
 
 # This is set localhost on which IGV listens
-localHost = 'http://localhost:60151/load?file=http%3A%2F%2F'
+#localHost = 'http://localhost:60151/load?file=http%3A%2F%2F'
+igv_localhost = 'http://localhost:60151/load?'
 # Making path to the server, which is hosting the data
-the_server = localHost+serverName
-
+hosting_server = 'file=%s' % host_name.replace(':', '%3A').replace('/', '%2F')
 
 # to get IGV link, optional
 if launchIGVfile:
@@ -67,22 +67,24 @@ for i in listOfFiles:
         home_variable = os.getenv('HOME')
         get_right_path = get_full_path.index(home_variable)
         get_right_path = get_full_path[get_right_path:]+'/'
-        path_to_file = the_server+get_right_path.replace('/', '%2F')
+
+        full_path = igv_localhost + hosting_server + get_right_path.replace('/', '%2F') + '%2F' + i
+
         bam_file = os.path.join(get_right_path, i)
         bam_file_root_name = i.strip().split("_")[0]
         bam_file_name = bam_file_root_name + ".sorted.bam"
-        name = 'name=%s' % bam_file_name
+        name = 'name=%s' % bam_file_root_name
 		# build igv url
         if genome and defaultCoordinates:
             genome_var = 'genome=%s&merge=true' % genome
             locus = 'locus=%s' % defaultCoordinates
-            igv_url = '&'.join((path_to_file, i, genome_var, locus, name))
-        if genome:
+            igv_url = '&'.join((full_path, genome_var, locus, name))
+        if genome and not defaultCoordinates:
             genome_var = 'genome=%s&merge=true' % genome
-            igv_url = '&'.join((path_to_file, i, genome_var, name))
-        if defaultCoordinates:
+            igv_url = '&'.join((full_path, genome_var, name))
+        if defaultCoordinates and not genome:
             locus = 'locus=%s' % defaultCoordinates
-            igv_url = '&'.join((path_to_file, i, locus, name))
+            igv_url = '&'.join((full_path, locus, name))
         if header:
             print '<tr><td>IGV links</td><td>BAM files</td><tr>'
             header = False
