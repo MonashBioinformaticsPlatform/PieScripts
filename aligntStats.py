@@ -69,6 +69,15 @@ chimeric = [chimeric,
 
 tables = [times, general, mapped, unmapped, chimeric]
 
+#rename = {
+#        job_on: 'Starting time',
+#        mapping_on: 'Mapping started',
+#        job_off: 'Mapping finished',
+#        total_reads: total_reads,
+#        input_length: input_length,
+#        average_length: average_length,
+#        uniquely_mapped: 
+#        }
 # get all in the bam directory
 listOfFiles = os.listdir(bamsDir) 
 
@@ -81,10 +90,11 @@ def get_value(key, line):
 # where every nested hash represents individual samples
 # file content
 def getDataObj(listOfFiles, tables):
-
+    # init empty hash
     dataDict = {}
+    # flatterning tables list 
     keys = [i for l in tables for i in l]
-
+    #
     for textFile in listOfFiles:
         filesDataDict = {}
         # select only Log.final.out files, which are STAR mappings stats files
@@ -104,75 +114,65 @@ def getDataObj(listOfFiles, tables):
 
     return dataDict
 
-#print getDataObj(listOfFiles, tables)
+# this outputs specially sorted hash
+# for easy join into table
+def getOrdObj(dataObj, tables):
+    ordDict = {}
+    # flatterning tables list 
+    keys = [i for l in tables for i in l]
+    for sample in sorted(dataObj.keys()):
+        v = dataObj[sample]
+        # append samples names into hash
+        # under key 'samples'
+        if 'samples' not in ordDict:
+            ordDict['samples'] = []
+        ordDict['samples'].append(sample)
+        # merge all values into single list 
+        # under common key
+        # because hash is ordered we can related sample names to data column
+        for key in keys:
+            if key not in ordDict:
+                ordDict[key] = []
+            ordDict[key].append(v[key])
 
-#def get_data_dict(list_of_files, keys):
-#    # initialise dictionary
-#    data_dict = {}
-#    # loop over all files in the bam directory
-#    for text_file in list_of_files:
-#        # select only Log.final.out files, which are STAR mappings stats files
-#        if text_file.endswith("Log.final.out"):
-#            # make samples name from the file
-#            name = text_file.split('_')[0]
-#            make_path = os.path.join(bamsDir, text_file)
-#            # open each stats files
-#            with open(make_path) as file_handle:
-#                for i in file_handle:
-#                    line = i.strip()
-#                    tmp_data = [get_value(key, line) for key in keys if key in line]
-#                    if tmp_data:
-#                        k,v = tmp_data[0]
-#                        if k not in data_dict:
-#                            data_dict[k] = {}
-#                        data_dict[k][name] = v
-#    return data_dict
-#
-##$data_dict = get_data_dict(list_of_files, times.keys())
-##$print data_dict
-#
-#def get_table(data_dict):
-#    header = True
-#    
-#    #header_list = ["<table class='check' border=1 frame=void rules=all cellpadding=5px>"]
-#    check = "<table class='check' border=1 frame=void rules=all cellpadding=5px>"+'\n'
-#    
-#    table_list = []
-#    
-#    cell = '<td>%s</td>'
-#    get_sample_n = None
-#    
-#    for k,v in data_dict.items():
-#        #print k,v
-#        if header:
-#            sample_name = [i for i in sorted(v.keys())]
-#            get_sample_n = len(sample_name)+1
-#            sample_name.insert(0, '')
-#            cells = cell*get_sample_n
-#            row = '<tr>%s</tr>' % cells
-#            row_cell = row % tuple(sample_name)
-#            #header_list.append(row_cell)
-#            check += row_cell+'\n'
-#            header = False
-#    
-#        data_values = [data_dict[k][i] for i in sorted(v.keys())]
-#        cells = cell*get_sample_n
-#        data_values.insert(0, k)
-#        row = '<tr>%s</tr>' % cells
-#        row_cell = row % tuple(data_values)
-#        #table_list.insert(times[k], row_cell)
-#        #print times[k]
-#        check += row_cell+'\n'
-#        
-#    #table_list.append("</table>")
-#    
-#    #check = '\n'.join(( '\n'.join(header_list), '\n'.join(table_list) ))
-#    #
-#    #print check
-#    
-#    return check
-#
-#for table in tables:
-#    data_dict = get_data_dict(list_of_files, table)
-#    print get_table(data_dict)
-#    print '<br>'
+    return ordDict
+
+def getHTMLtable(ordObj, keys):
+    htmlList = []
+    # this is number of columns
+    # extra one for naming column
+    # each column corresponds to a sample, whereas rows to different types of information e.g mapped reads
+    samplesN = len(ordObj['samples'])+1
+    header = True
+    #for k,v in ordObj.items():
+    for key in keys:
+        if header:
+            h = list(ordObj['samples'])
+            h.insert(0, '')
+            cells = '<td>%s</td>'*samplesN
+            skeleton = '<tr>%s</tr>' % cells
+            row = skeleton % tuple(h)
+            htmlList.append(row)
+            header = False
+    
+        d = list(ordObj[key])
+        d.insert(0, key)
+        cells = '<td>%s</td>'*samplesN
+        skeleton = '<tr>%s</tr>' % cells
+        row = skeleton % tuple(d)
+        htmlList.append(row)
+
+    return htmlList
+
+dataObj = getDataObj(listOfFiles, tables)
+ordObj = getOrdObj(dataObj, tables)
+#htmlList = getHTMLtable(ordObj, chimeric)
+#print htmlList
+
+for keys in tables:
+    htmlList = getHTMLtable(ordObj, keys)
+    print "<table class='check' border=1 frame=void rules=all cellpadding=5px>"
+    #print htmlList
+    print '\n'.join(htmlList)
+    print '</table>'
+    print '<br>'
