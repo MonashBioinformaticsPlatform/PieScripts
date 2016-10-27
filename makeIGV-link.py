@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 import sys, os, re, argparse, getpass
-
+#hey test comment
 parser = argparse.ArgumentParser(usage='%(prog)s --dir <path/to/yourData>',
                                  description="This scripts makes special URL links that you can use to view your data in IGV. IGV can display several different file formats including VCF and BAM",
                                  add_help=True
