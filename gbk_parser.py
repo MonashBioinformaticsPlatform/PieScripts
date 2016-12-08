@@ -2,12 +2,12 @@
 # -*- coding: iso-8859-15 -*-
 
 # author: serine
-# date: 06/11/2016
+# date: 2016.12.06
+# updated: 2016.12.08
 
 import sys
 import gzip
 import argparse
-
 
 #keys = ["LOCUS",
 #        "DEFINITION",
@@ -50,7 +50,6 @@ def get_features(elements, source, counter):
     for element in elements:
         if '..' in element:
             if build:
-                #print build.strip(';')
                 build = build.strip(';') + '\n'
     
             build += source
@@ -64,16 +63,26 @@ def get_features(elements, source, counter):
             addon += 1
 
         else:
-            if element.endswith('"') and not element.startswith('/'):
+            #if element.endswith('"') and not element.startswith('/'):
+            if ( element.endswith('"') or element.endswith('') ) and not element.startswith('/'):
                 build = build.strip(';') + " " + element
                 build += ';'
             else:
                 build += element.strip('/')
                 build += ';'
 
-    
     return build.strip(';')
 
+def trim_translation(obj):
+
+    for o in obj:
+        try:
+            t = "translation="
+            get_start = o.index(t)
+            get_end = o.index('"', get_start+len(t)+1)
+            yield o[:get_start] + o[get_end:]
+        except ValueError:
+            yield o
 
 def main(handler):
 
@@ -82,7 +91,7 @@ def main(handler):
     
     key_start = "FEATURES"
     key_end = "BASE"
-
+    
     all = handler.read()
     source = all[all.index(source_start):all.index(source_end)]
     source = [a.strip() for a in source.split(' ') if a][1]
@@ -92,35 +101,23 @@ def main(handler):
     my_string = features
     current_idx = 0
     counter = 0
-    gff_file = ""
+    gff_file = []
     while idx:
         try:
             current_idx = my_string.index(" gene", idx+1)
             if idx > 1:
                 gene = my_string[idx:current_idx]
-                # remove amino acid sequence, its not needed in gff file
-                try:
-                    t_idx = gene.index("/translation=")
-                    gene = gene[:t_idx]
-                except ValueError:
-                    pass
-    
                 elements = [a.strip() for a in gene.split('\n') if a]
-                #print get_features(elements, source, counter)
-                gff_file += get_features(elements, source, counter)
-                gff_file += '\n'
+                yield get_features(elements, source, counter)
                 counter += 1
+
             idx = current_idx
         except ValueError:
             gene = my_string[idx:]
             elements = [a.strip() for a in gene.split('\n') if a]
-            #print get_features(elements, source, counter)
-            gff_file += get_features(elements, source, counter)
-            gff_file += '\n'
+            yield get_features(elements, source, counter)
             idx = 0
     
-    yield gff_file.strip('\n')
-
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(usage='%(prog)s --gbk_file <path/to/GenBank file>',
@@ -131,10 +128,15 @@ if __name__ == "__main__":
                         required=True,
                         help="provide GenBank file"
                         )
+    parser.add_argument('--keep_seq',
+                        action='store_false',
+                        help="If you want to keep translation - amino acid sequence"
+                       )
     
     args = parser.parse_args()
     gbk_file = args.gbk_file
-
+    keep_seq = args.keep_seq
+    
     handler = None
     
     if gbk_file.endswith(".gz"):
@@ -142,5 +144,9 @@ if __name__ == "__main__":
     else:
         handler = open(gbk_file)
 
-    for i in main(handler):
-        print i
+    if keep_seq:
+        for i in trim_translation(main(handler)):
+            print i
+    else:
+        for i in main(handler):
+            print i
