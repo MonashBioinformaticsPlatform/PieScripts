@@ -1,29 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
-# author: serine
-# date: 2016.12.06
-# updated: 2016.12.08
-
 import sys
 import gzip
 import argparse
-
-#keys = ["LOCUS",
-#        "DEFINITION",
-#        "ACCESSION",
-#        "VERSION",
-#        "KEYWORDS",
-#        "SOURCE",
-#        "ORGANISM",
-#        "REFERENCE",
-#        "AUTHORS",
-#        "TITLE",
-#        "JOURNAL",
-#        "COMMENT",
-#        "FEATURES",
-#        "BASE",
-#        "ORIGIN"]
 
 
 def get_coords(s):
@@ -43,82 +23,143 @@ def get_coords(s):
 
     return name, start, end, '.', strand, '.'
 
-def get_features(elements, source, counter):
-    addon = 1
+def do_attribute(attribute, feature_line):
 
-    build = '' 
-    for element in elements:
-        if '..' in element:
-            if build:
-                build = build.strip(';') + '\n'
-    
-            build += source
-            build += '\t'
-            build += "circular"
-            build += '\t'
-            build += '\t'.join(get_coords(element))
-            build += '\t'
-            build += "id=%s.%s" % (str(counter), str(addon))
-            build += ';'
-            addon += 1
+    if attribute.startswith('/') and attribute.endswith('"'):
+        attribute = attribute.strip('/')
+        feature_line += attribute
+        feature_line += ';'
+        return feature_line
+
+    else:
+        #if element.endswith('"') and not element.startswith('/'):
+        if ( attribute.endswith('"') or attribute.endswith('') ) and not attribute.startswith('/'):
+            feature_line = feature_line.strip(';') + "_" + attribute
+            feature_line += ';'
+        else:
+            feature_line += attribute.strip('/')
+            feature_line += ';'
+
+    return feature_line.strip(';')
+
+def trim_translation(o):
+    t = "translation="
+    get_start = o.find(t)
+    get_end = o.find('"', get_start+len(t)+1)
+    if get_start != -1:
+        o = o[:get_start] + o[get_end+1:]
+    return o.strip(';')
+
+def messy(feature):
+    name_idx_start = feature.find(';Name=')
+    name_idx_end = feature.find(';', name_idx_start+1)
+    diff = name_idx_end - name_idx_start
+    start_idx = feature.rfind('.\t')
+
+    name = feature[name_idx_start+1:name_idx_end]
+    feature = feature[:start_idx+2] + \
+                name + \
+                ';' + \
+                feature[start_idx+2:name_idx_start] + \
+                ';' + \
+                feature[name_idx_start+diff+1:]
+
+    return feature
+
+gene_counter = 0
+cds_counter = 0
+other_coutner = 0
+parent_counter = 0
+
+def gff_parser(feature):
+    res = None
+    if "\tgene\t" in feature:
+        id = 'ID=gene%s;' % str(gene_counter) 
+
+        if "gene=" in feature:
+            id += 'Name='
+            feature = feature.replace('gene=', id)
+            feature = messy(feature)
+        else:
+            get_start = feature.rfind('.\t')
+            feature = feature[:get_start+2] + id + feature[get_start+2:]
+        res = tuple((feature, 'g'))
+
+    elif "\tCDS\t" in feature:
+        #id = 'ID=cds%s;Parent=gene%s;' % (str(cds_counter), str(parent_counter))
+        cds_counter = gene_counter - 1
+        id = 'ID=cds%s;Parent=gene%s;' % (str(cds_counter), str(cds_counter))
+
+        if "gene=" in feature:
+            id += 'Name='
+            feature = feature.replace('gene=', id)
+            feature = messy(feature)
 
         else:
-            #if element.endswith('"') and not element.startswith('/'):
-            if ( element.endswith('"') or element.endswith('') ) and not element.startswith('/'):
-                build = build.strip(';') + " " + element
-                build += ';'
+            get_start = feature.rfind('.\t')
+            feature = feature[:get_start+2] + id + feature[get_start+2:]
+
+        res = tuple((feature, 'c'))
+    else:
+        if gene_counter:
+            other_counter = gene_counter - 1
+        else:
+            other_counter = gene_counter
+
+        id = 'ID=misc%s;Parent=gene%s;' % (str(other_counter), str(other_counter))
+
+        if "gene=" in feature:
+            id += 'Name='
+            feature = feature.replace('gene=', id)
+            feature = messy(feature)
+        else:
+            get_start = feature.rfind('.\t')
+            feature = feature[:get_start+2] + id + feature[get_start+2:]
+
+        res = tuple((feature, 'o'))
+
+    return res
+
+def gbk_parser(gbk_handler):
+
+    V = "VERSION"
+    F = "FEATURE"
+    B = "BASE COUNT"
+    
+    ok = False
+    genome = 'unknown'
+    source = 'circular'
+    new_feature = ''
+    for i in handler:
+        line = i.strip()
+        if line.startswith(V):
+            genome = line.split()[1].strip()
+        # one loop over the block of interest
+        if line.startswith(B):
+            ok = False
+    
+        if ok:
+            if ".." in line:
+                if new_feature:
+                    yield new_feature.strip(';')
+                    #chk = make_gff(trim_translation(new_feature))
+                    #if chk[1] == 'g':
+                    #    gene_counter += 1
+                    #print chk[0]
+                    #print trim_translation(new_feature)
+                new_feature = '\t'.join((genome, source))
+                new_feature += '\t'
+                new_feature += '\t'.join(get_coords(line))
+                new_feature += '\t'
             else:
-                build += element.strip('/')
-                build += ';'
-
-    return build.strip(';')
-
-def trim_translation(obj):
-
-    for o in obj:
-        try:
-            t = "translation="
-            get_start = o.index(t)
-            get_end = o.index('"', get_start+len(t)+1)
-            yield o[:get_start] + o[get_end:]
-        except ValueError:
-            yield o
-
-def main(handler):
-
-    source_start = "ACCESSION"
-    source_end = "VERSION"
+                new_feature = do_attribute(line, new_feature)
+                #new_feature += ';'
     
-    key_start = "FEATURES"
-    key_end = "BASE"
-    
-    all = handler.read()
-    source = all[all.index(source_start):all.index(source_end)]
-    source = [a.strip() for a in source.split(' ') if a][1]
-    features = all[all.index(key_start):all.index(key_end)]
-    
-    idx = 1
-    my_string = features
-    current_idx = 0
-    counter = 0
-    gff_file = []
-    while idx:
-        try:
-            current_idx = my_string.index(" gene", idx+1)
-            if idx > 1:
-                gene = my_string[idx:current_idx]
-                elements = [a.strip() for a in gene.split('\n') if a]
-                yield get_features(elements, source, counter)
-                counter += 1
+        if line.startswith(F):
+            ok = True
 
-            idx = current_idx
-        except ValueError:
-            gene = my_string[idx:]
-            elements = [a.strip() for a in gene.split('\n') if a]
-            yield get_features(elements, source, counter)
-            idx = 0
-    
-if __name__ == "__main__":
+
+if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(usage='%(prog)s --gbk_file <path/to/GenBank file>',
                                      description="Parsers GenBank into GFF file",
@@ -129,24 +170,42 @@ if __name__ == "__main__":
                         help="provide GenBank file"
                         )
     parser.add_argument('--keep_seq',
-                        action='store_false',
+                        action='store_true',
                         help="If you want to keep translation - amino acid sequence"
+                       )
+    parser.add_argument('--make_gff',
+                        action='store_true',
+                        help="If you want to make proper GFF3 file format"
                        )
     
     args = parser.parse_args()
     gbk_file = args.gbk_file
     keep_seq = args.keep_seq
+    make_gff = args.make_gff
     
     handler = None
     
     if gbk_file.endswith(".gz"):
-        handler = gzip.open(gbk_file)
+        handler = gzip.open(gbk_file, 'rt')
     else:
         handler = open(gbk_file)
 
-    if keep_seq:
-        for i in trim_translation(main(handler)):
-            print i
-    else:
-        for i in main(handler):
-            print i
+    gbk = gbk_parser(handler)
+    for i in gbk:
+        if keep_seq:
+            if make_gff:
+                gff = gff_parser(i)
+                if gff[1] == 'g':
+                    gene_counter += 1
+                print(gff[0])
+            else:
+                print(i)
+        else:
+            i = trim_translation(i)
+            if make_gff:
+                gff = gff_parser(i)
+                if gff[1] == 'g':
+                    gene_counter += 1
+                print(gff[0])
+            else:
+                print(i)
